@@ -1,0 +1,39 @@
+#include "llvm/Pass.h"
+#include "llvm/IR/Module.h"
+#include "llvm/IR/Function.h"
+#include "llvm/IR/BasicBlock.h"
+#include "llvm/IR/Instructions.h"
+#include "llvm/IR/CFG.h"
+#include "llvm/Support/raw_ostream.h"
+
+using namespace llvm;
+
+namespace {
+  struct HelloPass : public FunctionPass {
+    static char ID;
+    HelloPass() : FunctionPass(ID) {}
+
+    bool runOnFunction(Function &F) override {
+      errs() << "Running HelloPass on function: " << F.getName() << "\n";
+
+      for (auto &BB : F) {
+        errs() << "Basic Block in function " << F.getName() << ":\n\n";
+
+        // Print the number of predecessors and successors for each basic block
+        errs() << "  Number of Predecessors: " << pred_size(&BB) << "\n";
+        errs() << "  Number of Successors: " << succ_size(&BB) << "\n";
+
+        // Iterate over each instruction in the basic block
+        for (auto &Inst : BB) {
+          errs() << "    Instruction: " << Inst << "\n\n";
+        }
+      }
+      return false;  // Does not modify the function
+    }
+  };
+}  // end of anonymous namespace
+
+char HelloPass::ID = 0;
+static RegisterPass<HelloPass> X("Hello", "Hello Pass",
+                                 false /* Only looks at CFG */,
+                                 false /* Analysis Pass */);
